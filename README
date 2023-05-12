@@ -12,3 +12,42 @@ man man/vlmcsd.7
 
 If you don't have man, you may also use the .txt, .html and .pdf files
 in the man directory
+
+
+## Client
+### Windows
+>slmgr.vbs -upk  
+>slmgr.vbs -ipk XXXXX-XXXXX-XXXXX-XXXXX-XXXXX  
+>slmgr.vbs -skms DOCKER_IP:PORT  
+>slmgr.vbs -ato  
+>slmgr.vbs -dlv  
+
+### Office x86
+>cd \Program Files (x86)\Microsoft Office\Office16  
+>cscript ospp.vbs /sethst:DOCKER_IP  
+>cscript ospp.vbs /setprt:PORT  
+>cscript ospp.vbs /inpkey:xxxxx-xxxxx-xxxxx-xxxxx-xxxxx  
+>cscript ospp.vbs /act  
+>cscript ospp.vbs /dstatusall  
+
+### Office x86_64
+>cd \Program Files\Microsoft Office\Office16  
+>cscript ospp.vbs /sethst:DOCKER_IP  
+>cscript ospp.vbs /setprt:PORT  
+>cscript ospp.vbs /inpkey:xxxxx-xxxxx-xxxxx-xxxxx-xxxxx  
+>cscript ospp.vbs /act  
+>cscript ospp.vbs /dstatusall  
+
+## Sources
+> https://forums.mydigitallife.info/threads/50234-Emulated-KMS-Servers-on-non-Windows-platforms  
+https://github.com/Wind4/vlmcsd
+
+## GVLK keys
+> Windows: https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys  
+> Office 2013: https://technet.microsoft.com/en-us/library/dn385360.aspx  
+> Office 2016 & 2019 & 2021: https://technet.microsoft.com/en-us/library/dn385360(v=office.16).aspx
+
+## Refs:
+> https://learn.microsoft.com/en-us/DeployOffice/vlactivation/gvlks?redirectedfrom=MSDN
+> https://config.office.com/deploymentsettings
+> https://www.microsoft.com/en-us/download/details.aspx?id=49117
