@@ -38,14 +38,21 @@ in the man directory
 >cscript ospp.vbs /act  
 >cscript ospp.vbs /dstatusall  
 
+## GVLK keys
+Windows 10/11 Pro				- W269N-WFGWX-YVC9B-4J6C9-T83GX
+Windows 10/11 Enterprise			- NPPR9-FWDCX-D2C8J-H872K-2YT43
+Windows Server 2022 Datacenter			- WX4NM-KYWYW-QJJR4-XV3QB-6VM33
+Windows Server 2022 Datacenter [Azure Edition]	- NTBV8-9K7Q8-V27C6-M2BTV-KHMXV
+Windows Server 2022 Standard			- VDYBN-27WPP-V4HQT-9VMD4-VMK7H
+Office LTSC Professional Plus 2021		- FXYTK-NJJ8C-GB6DW-3DYQT-6F7TH
+
 ## Sources
 > https://forums.mydigitallife.info/threads/50234-Emulated-KMS-Servers-on-non-Windows-platforms  
 https://github.com/Wind4/vlmcsd
 
 ## GVLK keys
-> Windows: https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys  
-> Office 2013: https://technet.microsoft.com/en-us/library/dn385360.aspx  
-> Office 2016 & 2019 & 2021: https://technet.microsoft.com/en-us/library/dn385360(v=office.16).aspx
+> Windows: https://learn.microsoft.com/en-us/windows-server/get-started/kms-client-activation-keys
+> Office: https://learn.microsoft.com/en-us/DeployOffice/vlactivation/gvlks
 
 ## Refs:
 > https://learn.microsoft.com/en-us/DeployOffice/vlactivation/gvlks?redirectedfrom=MSDN
