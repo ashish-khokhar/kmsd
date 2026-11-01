@@ -965,7 +965,12 @@ static uint8_t checkPidLength(const RESPONSE *const responseBase)
 {
 	unsigned int i;
 
-	if (LE32(responseBase->PIDSize) > (PID_BUFFER_SIZE << 1)) return FALSE;
+	// PIDSize is attacker-controlled (comes from the KMS server's response).
+	// Must be a whole number of UCS-2 chars and >= 2 chars, otherwise the
+	// (PIDSize/2)-1 / (PIDSize/2)-2 index expressions below underflow (OOB read).
+	if (LE32(responseBase->PIDSize) > (PID_BUFFER_SIZE << 1) ||
+		LE32(responseBase->PIDSize) < 4 ||
+		(LE32(responseBase->PIDSize) & 1)) return FALSE;
 	if (responseBase->KmsPID[(LE32(responseBase->PIDSize) >> 1) - 1]) return FALSE;
 
 	for (i = 0; i < (LE32(responseBase->PIDSize) >> 1) - 2; i++)
@@ -989,6 +994,18 @@ RESPONSE_RESULT DecryptResponseV4(RESPONSE_V4* response_v4, const int responseSi
 			PID_BUFFER_SIZE << 1);
 
 	const int messageSize = copySize + V4_POST_EPID_SIZE;
+
+	// responseSize and PIDSize are controlled by the remote KMS server. Reject responses whose
+	// size is inconsistent with the (attacker-chosen) PIDSize, otherwise:
+	//   - "responseSize - copySize" below underflows to a huge size_t => wild memcpy, and
+	//   - AesCmacV4() writes its 16-byte MAC at rawResponse + messageSize, past the buffer.
+	if (responseSize < messageSize ||
+		responseSize > (int)(copySize + V4_POST_EPID_SIZE + sizeof(response_v4->MAC)))
+	{
+		RESPONSE_RESULT badResult;
+		badResult.mask = 0;
+		return badResult;
+	}
 
 	memcpy(response_v4, rawResponse, copySize);
 	memcpy(&response_v4->ResponseBase.CMID, rawResponse + copySize, responseSize - copySize);
@@ -1092,6 +1109,16 @@ RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6* response_v6, int responseSize, BY
 	result.mask = (DWORD)~0; // Set all bits in the results mask to 1. Assume success first.
 	result.effectiveResponseSize = responseSize;
 
+	// responseSize is controlled by the remote KMS server and is used below as an (unchecked)
+	// AES-CBC length ("responseSize -= copySize1") and to index the padding bytes. Too small a
+	// value underflows into AesDecryptCbc()'s size_t and reads the pad/PID fields out of bounds.
+	if (responseSize < (int)(sizeof(response_v6->Version) + sizeof(response_v6->IV) +
+		sizeof(response_v6->ResponseBase.Version) + sizeof(response_v6->ResponseBase.PIDSize)))
+	{
+		result.mask = 0;
+		return result;
+	}
+
 	int copySize1 =
 		sizeof(response_v6->Version);
 
@@ -1132,6 +1159,16 @@ RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6* response_v6, int responseSize, BY
 		V6_UNENCRYPTED_SIZE +
 		sizeof(response_v6->ResponseBase.PIDSize) +
 		(pidSize <= PID_BUFFER_SIZE << 1 ? pidSize : PID_BUFFER_SIZE << 1);
+
+	// Ensure the server-chosen PIDSize is sane and that both copies below (copySize1, then the
+	// fixed post-ePID block) stay within the received buffer (responseSize + MAX_EXCESS_BYTES).
+	if (pidSize < 4 || (pidSize & 1) ||
+		(size_t)copySize1 + (size_t)(v6 ? V6_POST_EPID_SIZE : V5_POST_EPID_SIZE) >
+			(size_t)result.effectiveResponseSize + 16)
+	{
+		result.mask = 0;
+		return result;
+	}
 
 	// Copy part 1 of response up to variable sized PID
 	memcpy(response_v6, response, copySize1);

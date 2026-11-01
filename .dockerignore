@@ -1,0 +1,22 @@
+# Keep the build context small and, crucially, force a clean compile *inside* the
+# image. Without this, a host-built binary in bin/ (or stale src/*.o) gets copied in,
+# `make` treats it as up-to-date, and the image ships a binary built for the wrong
+# libc/architecture for the Alpine base (musl / multi-arch).
+.git
+.github
+.gitignore
+.gitmodules
+
+bin/
+lib/
+build/
+**/*.o
+*.pid
+
+# IDE / packaging / prebuilt docs not needed to build or run the server
+VisualStudio/
+floppy/
+*.html
+*.pdf
+Dockerfile
+.dockerignore
